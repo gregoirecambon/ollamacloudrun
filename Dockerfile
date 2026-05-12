@@ -1,11 +1,17 @@
-FROM ollama/ollama
+FROM ollama/ollama:latest
 
-ENV OLLAMA_HOST 0.0.0.0:8080
-ENV HOME /root
-ENV OLLAMA_MODELS /models
-ENV OLLAMA_DEBUG false
+ENV OLLAMA_HOST=0.0.0.0:8080
+ENV HOME=/root
+ENV OLLAMA_MODELS=/models
+ENV OLLAMA_DEBUG=false
+ENV OLLAMA_KEEP_ALIVE=-1
 
-RUN apt-get update && apt-get install netcat -y
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
-ADD pull.sh /
-RUN ./pull.sh
+RUN ollama serve & \
+    sleep 10 && \
+    ollama pull gemma4:26b
+
+EXPOSE 8080
+
+ENTRYPOINT ["ollama", "serve"]
